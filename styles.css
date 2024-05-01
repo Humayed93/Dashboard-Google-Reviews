@@ -1,0 +1,208 @@
+.custom-box1 {
+background-color: #f2f2f2;
+padding: 20px;
+margin-bottom: 20px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+
+}
+.custom-box2 {
+  background-color: #cccccc;
+  padding: 20px;
+  margin-bottom: 20px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  
+}
+.custom-box3 {
+  background-color: #e6e6e6;
+  padding: 20px;
+  margin-bottom: 20px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  
+}
+/* Adjust the width of the sidebar */
+.custom-sidebar {
+  width: 20%; 
+  float: left;
+  display: inline-block;
+}
+/* Adjust the width of the main panel accordingly */
+.custom-main-panel {
+  width: 80%;
+  float: left;
+  display: inline-block;
+}
+
+
+/* Margin for plots */
+.tab-content {
+  margin-top: 20px; 
+}
+
+.well {
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+.info-boxes {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+.info-box {
+  padding: 10px;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+.number {
+  font-size: 2em;
+}
+.descriptor {
+  font-size: 1em;
+}
+.chart-header {
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 20px;
+}
+.data-table-container {
+  max-width: 100%; 
+  overflow-x: auto; /* Enables horizontal scrolling */
+}
+.g-gtitle {
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.nav-tabs {
+  border-bottom: 1px solid #ADD8E6; /* Adjust to match the border color of the tabs */
+}
+.nav-tabs > li {
+  margin-bottom: -1px; /* Overlap the bottom border */
+  margin-right: -2px; /* Overlap the right border */
+}
+
+.nav-tabs > li > a,
+.nav-tabs > li > a:hover {
+  border: 1px solid #ADD8E6; /* Blue border for all states */
+  border-bottom: none; /* Remove bottom border for all states */
+  border-radius: 8px 8px 0 0; /* Rounded corners for all states */
+}
+
+.nav-tabs > li:not(:last-child) > a,
+.nav-tabs > li > a:hover {
+  border-right: none; /* Remove the border between tabs for non-last-child and hover state */
+}
+
+.nav-tabs > li > a {
+  background-color: #FFFFFF;
+  color: black; /* Black text for inactive tabs */
+  border-color: #ADD8E6; /* Blue border for inactive tab */
+}
+
+.nav-tabs > li > a:hover {
+  background-color: #ADD8E6; /* Blue background on hover */
+  color: white; /* White text on hover */
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  background-color: #ADD8E6; /* Blue background for active tab */
+  color: white; /* White text for active tab */
+  border-color: #ADD8E6; /* Blue border for active tab */
+  border-bottom-color: transparent; /* Make the bottom border transparent */
+  z-index: 2; /* Place the active tab above the others */
+  border-right: none;
+}
+
+/* Change the slider track color */
+.js-irs-0 .irs-bar, .js-irs-1 .irs-bar {
+  background: #ADD8E6;
+  border-color: #ADD8E6;
+}
+
+/* Change the slider handle color */
+.js-irs-0 .irs-handle, {
+  background: #ffffff; 
+  border-color: #ADD8E6;
+}
+
+/* Change the color of the slider from the handle to the end */
+.js-irs-0 .irs-bar-edge {
+  background: #ADD8E6;
+}
+
+/* Change the background color of the handles */
+.irs .irs-from, .irs .irs-to {
+  background-color: #ADD8E6;
+}
+
+.js-irs-0 .irs-single, .js-irs-1 .irs-single {
+  background-color: #ADD8E6;
+}
+
+/* Change the color for the handle on focus or active state */
+.js-irs-0 .irs-handle:active,
+.js-irs-0 .irs-handle:focus,
+.js-irs-0 .irs-handle:hover{
+  border-color: #ffffff;
+  background: #ADD8E6; 
+}
+   /* Style the dropdown */
+.selectpicker {
+  border: 1px solid #ADD8E6t; 
+  border-radius: 4px; /* Rounded corners for dropdown */
+  background-color: #FAFAFA !important; /* White background */
+}
+
+.bootstrap-select .dropdown-toggle:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 0.2rem rgba(173, 216, 230, 0.5);
+}
+
+/* Style the container of the dropdown to have rounded corners as well */
+.bootstrap-select .dropdown-toggle {
+  background-color: #FFFFFF;  
+  border-radius: 4px;
+  border: 1px solid #ADD8E6
+}
+
+/* Adjust the dropdown menu itself to have rounded corners */
+.dropdown-menu {
+  border-radius: 4px;
+}
+
+/* Adjust the shadow for the dropdown container */
+.selectize-control.single .selectize-input {
+  border-radius: 4px;
+  border: 1px solid #ADD8E6
+}
+
+/* Change the background color on hover of dropdown options */
+.selectize-dropdown-content .option:hover,
+.selectize-dropdown-content .option:focus,
+.selectize-dropdown-content .option[data-selected] {
+  background-color: #e6e6e6;
+}
+
+.selectize-dropdown .selected {
+  background-color: #ADD8E6;
+  color: white;
+}
+
+/* Change the outline color of the selectize input when it is focused */
+.selectize-input.focus {
+  border-color: #ADD8E6; /* Teal border for focused state */
+  box-shadow: 0 0 0 1px #ADD8E6;
+}
+
+.box1 { background-color: #ADD8E6; }
+.box2 { background-color: #ADD8E6; }
+.box3 { background-color: #ADD8E6; }
