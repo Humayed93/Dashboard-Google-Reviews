@@ -60,7 +60,7 @@ server <- function(input, output, session) {
     data <- data %>%
       mutate(month_year = floor_date(datetime_parsed, "month")) %>%
       group_by(month_year) %>%
-      summarise(average_rating = mean(rating, na.rm = TRUE), .groups = 'drop') %>%
+      summarise(average_rating = mean(review_rating, na.rm = TRUE), .groups = 'drop') %>%
       arrange(month_year)
     
     # Calculate the slope of average ratings over time

@@ -10,6 +10,7 @@ suppressPackageStartupMessages({
   library(lattice)
   library(factoextra)
   library(lubridate)
+  library('this.path')
 })
 
 # For data exploration
@@ -31,7 +32,7 @@ ui <- navbarPage(
   
   theme = shinytheme("yeti"),
   tags$head(
-    includeCSS("styles.css")
+    includeCSS(file.path(this.dir(), "styles.css"))
   ),
   tabPanel("Introduction",
            sidebarLayout(
