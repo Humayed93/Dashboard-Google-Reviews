@@ -92,8 +92,8 @@ ui <- navbarPage(
                  tabPanel("Rating Distribution (Restaurants)", plotlyOutput("ratingDist")),
                  tabPanel("Rating Distribution (Reviews)", plotlyOutput("reviewRatingDist")), 
                  tabPanel("Reviews over Time", plotlyOutput("reviewsPerYearPlot")),
-                 tabPanel("Rating Trends", plotlyOutput("reviewsPerMonthPlot"))
-                 
+                 tabPanel("Rating Trends", plotlyOutput("reviewsPerMonthPlot")),
+                 tabPanel("Map View", leafletOutput("map"))
                )
              )
            ))

@@ -12,8 +12,8 @@ suppressPackageStartupMessages({
   library(lubridate)
 })
 
-# For data exploration
 load('./review_data_cleaned.RData')
+load(file.path(this.dir(), "Restaurant_Information.RData"))
 
 # Create variables outside of the server/ui function
 # Extract unique values for filters
@@ -37,6 +37,20 @@ server <- function(input, output, session) {
       filter(if (length(input$reviewMonth) > 0) month %in% input$reviewMonth else TRUE) %>%
       filter(if (length(input$reviewYear) > 0) year %in% input$reviewYear else TRUE)
   })
+  
+  filteredData_restaurants <- reactive({
+    # Obtain the filtered review data
+    filtered_data <- filteredData()
+    
+    # Filter restaurant data based on names in the filtered review data
+    if (length(filtered_data$name) > 0) {
+      restaurant_data %>%
+        filter(name %in% filtered_data$name)
+    } else {
+      restaurant_data  # Return all if no names are filtered
+    }
+  })
+  
   
   filteredData_table <- reactive({
     review_data_cleaned %>%
@@ -251,5 +265,28 @@ server <- function(input, output, session) {
              yaxis = list(title = 'Number of Reviews'))
     
     p  # Render the Plotly plot
+  })
+  
+  output$map <- renderLeaflet({
+    # Default map centered on a generic location
+    leaflet() %>% 
+      addTiles() %>% 
+      setView(lng = 2.168672, lat = 41.389133, zoom = 12) # Adjust center and zoom level accordingly
+  })
+  
+  observe({
+    # Ensure that there's data to show, including when no filters are applied
+    req(filteredData_restaurants())
+    
+    # Get the data from the reactive expression
+    restaurants_to_show <- filteredData_restaurants()
+    
+    # Update the map
+    leafletProxy("map", data = restaurants_to_show) %>% 
+      clearMarkers() %>%
+      addMarkers(
+        lng = ~longitude, lat = ~latitude,
+        popup = ~paste(name)
+      )
   })
 }
