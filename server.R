@@ -269,9 +269,12 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     # Default map centered on a generic location
-    leaflet() %>% 
+    leaflet(filteredData_restaurants()) %>% 
       addTiles() %>% 
-      setView(lng = 2.168672, lat = 41.389133, zoom = 12) # Adjust center and zoom level accordingly
+      addMarkers(
+        lng = ~longitude, lat = ~latitude, popup = ~paste(name)
+      ) %>%
+      setView(lng = 2.168672, lat = 41.389133, zoom = 13) # Adjust center and zoom level accordingly
   })
   
   observe({
