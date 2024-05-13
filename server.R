@@ -10,10 +10,10 @@ suppressPackageStartupMessages({
   library(lattice)
   library(factoextra)
   library(lubridate)
+  library('this.path')
 })
 
-load('./review_data_cleaned.RData')
-load(file.path(this.dir(), "Restaurant_Information.RData"))
+load(file.path(this.dir(), 'review_data_cleaned.RData'))
 
 # Create variables outside of the server/ui function
 # Extract unique values for filters
@@ -21,6 +21,7 @@ name <- sort(unique(review_data_cleaned$name))
 years <- sort(unique(review_data_cleaned$year))
 days <- sort(unique(review_data_cleaned$weekday))
 months <- sort(unique(review_data_cleaned$month))
+type <- sort(unique(review_data_cleaned$type))
 
 # Minimum and maximum annual income for slider
 minReview <- min(review_data_cleaned$rating)
@@ -35,22 +36,18 @@ server <- function(input, output, session) {
       filter(rating >= input$restaurantRating[1] & rating <= input$restaurantRating[2]) %>%
       filter(if (length(input$reviewDay) > 0) weekday %in% input$reviewDay else TRUE) %>%
       filter(if (length(input$reviewMonth) > 0) month %in% input$reviewMonth else TRUE) %>%
-      filter(if (length(input$reviewYear) > 0) year %in% input$reviewYear else TRUE)
+      filter(if (length(input$reviewYear) > 0) year %in% input$reviewYear else TRUE) %>%
+      filter(if (length(input$restaurantType) > 0) type %in% input$restaurantType else TRUE)
   })
   
-  filteredData_restaurants <- reactive({
-    # Obtain the filtered review data
-    filtered_data <- filteredData()
+  filteredData_unique <- reactive({
+    req(filteredData())  # ensure the data is ready
+    data <- filteredData()
     
-    # Filter restaurant data based on names in the filtered review data
-    if (length(filtered_data$name) > 0) {
-      restaurant_data %>%
-        filter(name %in% filtered_data$name)
-    } else {
-      restaurant_data  # Return all if no names are filtered
-    }
+    # Group by name and location to ensure each restaurant appears only once
+    data %>%
+      distinct(name, .keep_all = TRUE)
   })
-  
   
   filteredData_table <- reactive({
     review_data_cleaned %>%
@@ -58,7 +55,8 @@ server <- function(input, output, session) {
       filter(rating >= input$restaurantRatingTable[1] & rating <= input$restaurantRatingTable[2]) %>%
       filter(if (length(input$reviewDayTable) > 0) weekday %in% input$reviewDayTable else TRUE) %>%
       filter(if (length(input$reviewMonthTable) > 0) month %in% input$reviewMonthTable else TRUE) %>%
-      filter(if (length(input$reviewYearTable) > 0) year %in% input$reviewYearTable else TRUE)
+      filter(if (length(input$reviewYearTable) > 0) year %in% input$reviewYearTable else TRUE) %>%
+      filter(if (length(input$restaurantTypeTable) > 0) type %in% input$restaurantTypeTable else TRUE)
   })
   
   output$filteredData_table <- renderDataTable({
@@ -269,27 +267,28 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     # Default map centered on a generic location
-    leaflet(filteredData_restaurants()) %>% 
+    leaflet(filteredData_unique()) %>% 
       addTiles() %>% 
       addMarkers(
-        lng = ~longitude, lat = ~latitude, popup = ~paste(name)
+        lng = ~longitude, lat = ~latitude, 
+        popup = ~paste(name, "<br>Review Score: ", rating)  # Add review score to the popup
       ) %>%
       setView(lng = 2.168672, lat = 41.389133, zoom = 13) # Adjust center and zoom level accordingly
   })
   
   observe({
     # Ensure that there's data to show, including when no filters are applied
-    req(filteredData_restaurants())
+    req(filteredData_unique())
     
     # Get the data from the reactive expression
-    restaurants_to_show <- filteredData_restaurants()
+    restaurants_to_show <- filteredData_unique()
     
     # Update the map
     leafletProxy("map", data = restaurants_to_show) %>% 
       clearMarkers() %>%
       addMarkers(
         lng = ~longitude, lat = ~latitude,
-        popup = ~paste(name)
+        popup = ~paste(name, "<br>Review Score: ", rating)  # Add review score to the popup
       )
   })
 }

@@ -13,8 +13,8 @@ suppressPackageStartupMessages({
   library('this.path')
 })
 
-# For data exploration
-load('./review_data_cleaned.RData')
+# Load dataset
+load(file.path(this.dir(), 'review_data_cleaned.RData'))
 
 # Create variables outside of the server/ui function
 # Extract unique values for filters
@@ -22,6 +22,7 @@ name <- sort(unique(review_data_cleaned$name))
 years <- sort(unique(review_data_cleaned$year))
 days <- sort(unique(review_data_cleaned$weekday))
 months <- sort(unique(review_data_cleaned$month))
+type <- sort(unique(review_data_cleaned$type))
 
 # Minimum and maximum annual income for slider
 minReview <- min(review_data_cleaned$rating)
@@ -54,7 +55,10 @@ ui <- navbarPage(
                            choices = months, multiple = TRUE, options = list(`actions-box` = TRUE)),
                pickerInput("reviewYearTable",
                            "Year of Review:",
-                           choices = years, multiple = TRUE, options = list(`actions-box` = TRUE))
+                           choices = years, multiple = TRUE, options = list(`actions-box` = TRUE)), 
+               pickerInput("restaurantTypeTable",
+                           "Type of Restaurant:",
+                           choices = type, multiple = TRUE, options = list(`actions-box` = TRUE))
              ),
              mainPanel(
                width = 9,
@@ -83,7 +87,10 @@ ui <- navbarPage(
                            choices = months, multiple = TRUE, options = list(`actions-box` = TRUE)),
                pickerInput("reviewYear",
                            "Year of Review:",
-                           choices = years, multiple = TRUE, options = list(`actions-box` = TRUE))
+                           choices = years, multiple = TRUE, options = list(`actions-box` = TRUE)), 
+               pickerInput("restaurantType",
+                           "Type of Restaurant:",
+                           choices = type, multiple = TRUE, options = list(`actions-box` = TRUE))
              ),
              mainPanel(
                width = 9,
