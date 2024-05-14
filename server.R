@@ -46,7 +46,7 @@ server <- function(input, output, session) {
     
     # Group by name and location to ensure each restaurant appears only once
     data %>%
-      distinct(name, .keep_all = TRUE)
+      distinct(name, longitude, latitude, rating, .keep_all = TRUE)
   })
   
   filteredData_table <- reactive({
@@ -290,5 +290,27 @@ server <- function(input, output, session) {
         lng = ~longitude, lat = ~latitude,
         popup = ~paste(name, "<br>Review Score: ", rating)  # Add review score to the popup
       )
+  })
+  
+  # Reactive expression to calculate the average review score per restaurant category
+  averageReviewByCategory <- reactive({
+    filteredData() %>%
+      group_by(type) %>%
+      summarise(average_rating = mean(review_rating, na.rm = TRUE), .groups = 'drop') %>%
+      arrange(desc(average_rating))
+  })
+  
+  # Render Plotly bar chart for average review score per restaurant category
+  output$averageReviewByCategoryPlot <- renderPlotly({
+    avg_data <- averageReviewByCategory()
+    
+    plot_ly(avg_data, x = ~reorder(type, -average_rating), y = ~average_rating, type = 'bar',
+            marker = list(color = '#ADD8E6', line = list(color = '#ADD8E6', width = 1.5)),
+            hovertext = ~paste(type, '<br>Average Rating:', round(average_rating, 2)),
+            hoverinfo = 'text') %>%
+      layout(title = 'Average Review Score per Restaurant Category',
+             xaxis = list(title = 'Restaurant Category', tickangle = -45),
+             yaxis = list(title = 'Average Review Score'),
+             margin = list(b = 150)) # Adjust bottom margin for category names
   })
 }
