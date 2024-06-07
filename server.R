@@ -13,6 +13,7 @@ suppressPackageStartupMessages({
   library('this.path')
 })
 
+# Load dataset
 load(file.path(this.dir(), 'review_data_cleaned.RData'))
 
 # Create variables outside of the server/ui function
@@ -72,7 +73,7 @@ server <- function(input, output, session) {
     data <- data %>%
       mutate(month_year = floor_date(datetime_parsed, "month")) %>%
       group_by(month_year) %>%
-      summarise(average_rating = mean(review_rating, na.rm = TRUE), .groups = 'drop') %>%
+      reframe(average_rating = mean(review_rating, na.rm = TRUE)) %>%
       arrange(month_year)
     
     # Calculate the slope of average ratings over time
@@ -125,7 +126,7 @@ server <- function(input, output, session) {
     # Mean rating of all restaurants
     rating_restaurants <- data %>%
       group_by(name) %>%
-      summarise(rating = unique(rating)) %>%
+      reframe(rating = unique(rating)) %>%
       arrange(desc(rating)) 
     
     # Calculate metrics
@@ -160,7 +161,7 @@ server <- function(input, output, session) {
     # Group by restaurant name and calculate the unique rating for each restaurant
     rating_restaurants <- data %>%
       group_by(name) %>%
-      summarise(rating = unique(rating)) %>%
+      reframe(rating = unique(rating)) %>%
       ungroup()  # ungroup to avoid issues in later steps
     
     if (nrow(rating_restaurants) > 0) {
@@ -251,7 +252,7 @@ server <- function(input, output, session) {
     # Count the number of reviews per year
     reviews_per_year <- data %>%
       group_by(year) %>%
-      summarise(count = n()) %>%
+      reframe(count = n()) %>%
       ungroup()
     
     # Plot
@@ -265,38 +266,30 @@ server <- function(input, output, session) {
     p  # Render the Plotly plot
   })
   
+  # Map setup with popup having a filter button
   output$map <- renderLeaflet({
-    # Default map centered on a generic location
-    leaflet(filteredData_unique()) %>% 
-      addTiles() %>% 
-      addMarkers(
+    leaflet() %>%
+      addTiles() %>%
+      addMarkers(data = filteredData_unique(),
         lng = ~longitude, lat = ~latitude, 
-        popup = ~paste(name, "<br>Review Score: ", rating)  # Add review score to the popup
-      ) %>%
-      setView(lng = 2.168672, lat = 41.389133, zoom = 13) # Adjust center and zoom level accordingly
+        popup = ~paste(name, "<br>Review Score: ", rating, 
+                       "<br><button onclick=\"Shiny.setInputValue('restaurantName','", 
+                       gsub("'","\\'", name),"', {priority: 'event'})\">Filter</button>")
+      )
   })
   
-  observe({
-    # Ensure that there's data to show, including when no filters are applied
-    req(filteredData_unique())
-    
-    # Get the data from the reactive expression
-    restaurants_to_show <- filteredData_unique()
-    
-    # Update the map
-    leafletProxy("map", data = restaurants_to_show) %>% 
-      clearMarkers() %>%
-      addMarkers(
-        lng = ~longitude, lat = ~latitude,
-        popup = ~paste(name, "<br>Review Score: ", rating)  # Add review score to the popup
-      )
+  # Observe the restaurantName input and update pickerInputs
+  observeEvent(input$restaurantName, {
+    trimmedName <- trimws(input$restaurantName)
+    updatePickerInput(session, "restaurantName", selected = trimmedName)
+    updatePickerInput(session, "restaurantNameTable", selected = trimmedName)
   })
   
   # Reactive expression to calculate the average review score per restaurant category
   averageReviewByCategory <- reactive({
     filteredData() %>%
       group_by(type) %>%
-      summarise(average_rating = mean(review_rating, na.rm = TRUE), .groups = 'drop') %>%
+      reframe(average_rating = mean(review_rating, na.rm = TRUE)) %>%
       arrange(desc(average_rating))
   })
   
