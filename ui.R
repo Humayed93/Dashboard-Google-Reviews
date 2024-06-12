@@ -14,7 +14,9 @@ suppressPackageStartupMessages({
 })
 
 # Load dataset
-load(file.path(this.dir(), 'review_data_cleaned.RData'))
+# load(file.path(this.dir(), 'review_data_cleaned.RData'))
+review_data_cleaned <- read_csv(file.path(this.dir(), 'review_data_with_sentiment.csv'))
+
 
 # Create variables outside of the server/ui function
 # Extract unique values for filters

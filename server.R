@@ -14,7 +14,8 @@ suppressPackageStartupMessages({
 })
 
 # Load dataset
-load(file.path(this.dir(), 'review_data_cleaned.RData'))
+# load(file.path(this.dir(), 'review_data_cleaned.RData'))
+review_data_cleaned <- read_csv(file.path(this.dir(), 'review_data_with_sentiment.csv'))
 
 # Create variables outside of the server/ui function
 # Extract unique values for filters
@@ -48,6 +49,24 @@ server <- function(input, output, session) {
     # Group by name and location to ensure each restaurant appears only once
     data %>%
       distinct(name, longitude, latitude, rating, .keep_all = TRUE)
+  })
+  
+  # New reactive expression to calculate average sentiment score and merge with filtered data
+  filtered_data_with_sentiment <- reactive({
+    sentiment_restaurants <- filteredData()  # Ensure this is a reactive expression or a reactive object
+    
+    # Calculate the average sentiment score for each restaurant, excluding scores of 0
+    avg_sentiment_scores <- sentiment_restaurants %>%
+      filter(review_analysis_score != 0) %>%
+      group_by(name) %>%
+      summarise(avg_sentiment = mean(review_analysis_score, na.rm = TRUE))
+    
+    # Merge the average sentiment scores with the filtered data
+    filtered_data <- filteredData_unique()  # Ensure this is a reactive expression or a reactive object
+    filtered_data_with_sentiment <- filtered_data %>%
+      left_join(avg_sentiment_scores, by = "name")
+    
+    return(filtered_data_with_sentiment)
   })
   
   filteredData_table <- reactive({
@@ -112,11 +131,11 @@ server <- function(input, output, session) {
     if (is.na(trend_data$slope)) {
       "Insufficient data to determine the trend."
     } else if (trend_data$slope > 0) {
-      "The trend is positive."
+      "Positive trend"
     } else if (trend_data$slope < 0) {
-      "The trend is negative."
+      "Negative trend"
     } else {
-      "The trend is stable (no change)."
+      "Stable trend (no change)"
     }
   })
   
@@ -133,6 +152,7 @@ server <- function(input, output, session) {
     numRestaurants <- length(unique(data$name))
     numberReviews <- nrow(data)
     avgReviewScore <- mean(rating_restaurants$rating, na.rm = TRUE)
+    avgSentimentScore <- mean(data$review_analysis_score[data$review_analysis_score != 0], na.rm = TRUE)
     
     # Create the HTML for the metrics using the styles we defined
     div(class = "info-boxes",
@@ -147,6 +167,10 @@ server <- function(input, output, session) {
         div(class = "info-box box3",
             div(class = "number", round(avgReviewScore, 2)),
             div(class = "descriptor", "Avg Review Score")
+        ),
+        div(class = "info-box box3",
+            div(class = "number", round(avgSentimentScore, 2)),
+            div(class = "descriptor", "Avg Sentiment Score")
         ),
         div(class = "info-box box3",
             div(class = "number", verbatimTextOutput("trendInfo")),
@@ -205,25 +229,41 @@ server <- function(input, output, session) {
   })
   
   output$reviewRatingDist <- renderPlotly({
-    data <- filteredData()  # Assuming this fetches your review data
+    data <- filteredData()  # Assuming this fetches your review data, including sentiment scores
     review_ratings <- data$review_rating
+    sentiment_scores <- data$review_analysis_score[data$review_analysis_score != 0]  # Exclude sentiment scores with 0
     
-    if (length(review_ratings) > 0) {
+    if (length(review_ratings) > 0 && length(sentiment_scores) > 0) {
       # Calculate the mean and median ratings
       median_rating <- median(review_ratings, na.rm = TRUE)
       mean_rating <- round(mean(review_ratings, na.rm = TRUE), 2)
       
-      # Create the histogram with customized hovertemplate
+      # Calculate the mean and median sentiment scores
+      median_sentiment <- median(sentiment_scores, na.rm = TRUE)
+      mean_sentiment <- round(mean(sentiment_scores, na.rm = TRUE), 2)
+      
+      # Create the histogram for review ratings
       p <- plot_ly(data, x = ~review_rating, type = 'histogram',
+                   name = 'Review Ratings',
                    marker = list(color = '#ADD8E6', line = list(color = 'rgba(255, 255, 255, 1)', width = 0.2)),
                    hoverinfo = 'x+y',  # Will display both the x value (range) and y value (count)
                    hovertemplate = paste(
                      "Rating: %{x}<br>",
                      "Count: %{y}<extra></extra>"  # The <extra></extra> tag hides the trace name
                    )) %>%
-        layout(title = 'Rating Distribution of Reviews',
-               xaxis = list(title = 'Rating'),
+        # Add the histogram for sentiment scores
+        add_trace(x = sentiment_scores, type = 'histogram',
+                  name = 'Sentiment Scores',
+                  marker = list(color = '#FFA07A', line = list(color = 'rgba(255, 255, 255, 1)', width = 0.2)),
+                  hoverinfo = 'x+y',
+                  hovertemplate = paste(
+                    "Sentiment Score: %{x}<br>",
+                    "Count: %{y}<extra></extra>"
+                  )) %>%
+        layout(title = 'Rating and Sentiment Score Distribution of Reviews',
+               xaxis = list(title = 'Score'),
                yaxis = list(title = 'Count'),
+               barmode = 'group', 
                annotations = list(
                  list(
                    x = 1, y = 1, xref = 'paper', yref = 'paper',
@@ -236,6 +276,18 @@ server <- function(input, output, session) {
                    text = paste("Mean Rating: ", mean_rating),
                    showarrow = FALSE, xanchor = 'right', yanchor = 'bottom',
                    xshift = -10, yshift = -20
+                 ),
+                 list(
+                   x = 1, y = 0.96, xref = 'paper', yref = 'paper',
+                   text = paste("Median Sentiment: ", median_sentiment),
+                   showarrow = FALSE, xanchor = 'right', yanchor = 'bottom',
+                   xshift = -10, yshift = -30
+                 ),
+                 list(
+                   x = 1, y = 0.94, xref = 'paper', yref = 'paper',
+                   text = paste("Mean Sentiment: ", mean_sentiment),
+                   showarrow = FALSE, xanchor = 'right', yanchor = 'bottom',
+                   xshift = -10, yshift = -40
                  )
                )
         )
@@ -266,13 +318,15 @@ server <- function(input, output, session) {
     p  # Render the Plotly plot
   })
   
+  
   # Map setup with popup having a filter button
   output$map <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
-      addMarkers(data = filteredData_unique(),
+      addMarkers(data = filtered_data_with_sentiment(),
         lng = ~longitude, lat = ~latitude, 
         popup = ~paste(name, "<br>Review Score: ", rating, 
+                       "<br>Average Sentiment Score: ", round(avg_sentiment, 2),
                        "<br><button onclick=\"Shiny.setInputValue('restaurantName','", 
                        gsub("'","\\'", name),"', {priority: 'event'})\">Filter</button>")
       )
@@ -293,17 +347,44 @@ server <- function(input, output, session) {
       arrange(desc(average_rating))
   })
   
-  # Render Plotly bar chart for average review score per restaurant category
+  # Reactive expression to calculate the average sentiment score per restaurant category
+  averageSentimentByCategory <- reactive({
+    filteredData() %>%
+      filter(review_analysis_score != 0) %>%
+      group_by(type) %>%
+      summarise(average_sentiment = mean(review_analysis_score, na.rm = TRUE)) %>%
+      arrange(desc(average_sentiment))
+  })
+  
+  # Reactive expression to combine both average ratings and sentiments
+  combinedAverageByCategory <- reactive({
+    review_data <- averageReviewByCategory()
+    sentiment_data <- averageSentimentByCategory()
+    
+    # Merge the data on 'type'
+    combined_data <- review_data %>%
+      left_join(sentiment_data, by = "type")
+    
+    return(combined_data)
+  })
+  
+  # Render Plotly bar chart for average review score and average sentiment score per restaurant category
   output$averageReviewByCategoryPlot <- renderPlotly({
-    avg_data <- averageReviewByCategory()
+    avg_data <- combinedAverageByCategory()
     
     plot_ly(avg_data, x = ~reorder(type, -average_rating), y = ~average_rating, type = 'bar',
+            name = 'Average Review Score',
             marker = list(color = '#ADD8E6', line = list(color = '#ADD8E6', width = 1.5)),
-            hovertext = ~paste(type, '<br>Average Rating:', round(average_rating, 2)),
+            hovertext = ~paste(type, '<br>Average Review Score:', round(average_rating, 2)),
             hoverinfo = 'text') %>%
-      layout(title = 'Average Review Score per Restaurant Category',
+      add_trace(y = ~average_sentiment, name = 'Average Sentiment Score', type = 'bar',
+                marker = list(color = '#FFA07A', line = list(color = '#FFA07A', width = 1.5)),
+                hovertext = ~paste(type, '<br>Average Sentiment Score:', round(average_sentiment, 2)),
+                hoverinfo = 'text') %>%
+      layout(title = 'Average Review and Sentiment Scores per Restaurant Category',
              xaxis = list(title = 'Restaurant Category', tickangle = -45),
-             yaxis = list(title = 'Average Review Score'),
+             yaxis = list(title = 'Score'),
+             barmode = 'group',
              margin = list(b = 150)) # Adjust bottom margin for category names
   })
 }
