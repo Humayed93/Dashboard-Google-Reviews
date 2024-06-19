@@ -13,11 +13,13 @@ suppressPackageStartupMessages({
   library('this.path')
 })
 
-# Load dataset
-# load(file.path(this.dir(), 'review_data_cleaned.RData'))
+#--- Load dataset -------------------------------------------------------------
 review_data_cleaned <- read_csv(file.path(this.dir(), 'review_data_with_sentiment.csv'))
 
-# Create variables outside of the server/ui function
+# Exclude 'about' variable from dataset
+review_data_cleaned <- review_data_cleaned %>% select(-about)
+
+#--- Create variables outside of the server/ui function -----------------------
 # Extract unique values for filters
 name <- sort(unique(review_data_cleaned$name))
 years <- sort(unique(review_data_cleaned$year))
@@ -29,9 +31,11 @@ type <- sort(unique(review_data_cleaned$type))
 minReview <- min(review_data_cleaned$rating)
 maxReview <- max(review_data_cleaned$rating)
 
-# Define server logic
+#--- Define server logic ------------------------------------------------------
+
 server <- function(input, output, session) {
-  # Reactive expression to filter data
+  
+  # -- Reactive expressions to filter data --------------------
   filteredData <- reactive({
     review_data_cleaned %>%
       filter(if (length(input$restaurantName) > 0) name %in% input$restaurantName else TRUE) %>%
@@ -69,6 +73,7 @@ server <- function(input, output, session) {
     return(filtered_data_with_sentiment)
   })
   
+  # Filtered data for the table overview on first page
   filteredData_table <- reactive({
     review_data_cleaned %>%
       filter(if (length(input$restaurantNameTable) > 0) name %in% input$restaurantNameTable else TRUE) %>%
@@ -83,8 +88,37 @@ server <- function(input, output, session) {
     filteredData_table()
   })
   
+  # Reactive expression to get unique categories for the selected restaurant
+  restaurantCategories <- reactive({
+    if (length(input$restaurantName) > 0) {
+      selected_restaurant <- input$restaurantName
+      unique(review_data_cleaned %>% filter(name %in% selected_restaurant) %>% pull(type))
+    } else {
+      unique(review_data_cleaned$type)
+    }
+  })
   
-  # calculate average ratings per month
+  # Reactive expression to get unique categories for the selected restaurant in the table
+  restaurantCategoriesTable <- reactive({
+    if (length(input$restaurantNameTable) > 0) {
+      selected_restaurant_table <- input$restaurantNameTable
+      unique(review_data_cleaned %>% filter(name %in% selected_restaurant_table) %>% pull(type))
+    } else {
+      unique(review_data_cleaned$type)
+    }
+  })
+  
+  # Observe changes in the restaurantName input and update the restaurantType picker input
+  observe({
+    updatePickerInput(session, "restaurantType", choices = restaurantCategories())
+  })
+  
+  # Observe changes in the restaurantNameTable input and update the restaurantTypeTable picker input
+  observe({
+    updatePickerInput(session, "restaurantTypeTable", choices = restaurantCategoriesTable())
+  })
+  
+  # Calculate average ratings per month for trend analysis
   monthlyReviewData <- reactive({
     data <- filteredData()
     
@@ -107,7 +141,7 @@ server <- function(input, output, session) {
     list(data = data, slope = slope)  # Return both data and slope
   })
   
-  # Render Plotly output for average monthly ratings
+  # -- Plotly output for average monthly ratings --------------------
   output$reviewsPerMonthPlot <- renderPlotly({
     req(monthlyReviewData())  # Ensuring that the data is not NULL
     data <- monthlyReviewData()
@@ -115,7 +149,8 @@ server <- function(input, output, session) {
     
     if (nrow(data) > 0) {
       plot_ly(data, x = ~month_year, y = ~average_rating, type = 'scatter', mode = 'lines+markers',
-              line = list(color = '#ADD8E6')) %>%
+              line = list(color = '#94E2D1'), 
+              marker = list(color = '#FFA07A')) %>%
         layout(title = 'Average Monthly Ratings',
                xaxis = list(title = 'Month-Year', type = 'date'),
                yaxis = list(title = 'Average Rating'),
@@ -125,7 +160,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # Output for trend display
+  # -- Output for trend display --------------------------------------
   output$trendInfo <- renderText({
     trend_data <- monthlyReviewData()  # Get the reactive list with data and slope
     if (is.na(trend_data$slope)) {
@@ -139,6 +174,7 @@ server <- function(input, output, session) {
     }
   })
   
+  # -- Output for metrics display --------------------------------------
   output$metricsDisplay <- renderUI({
     data <- filteredData()
     
@@ -179,7 +215,7 @@ server <- function(input, output, session) {
     )
   })
   
-  
+  # -- Plotly output for rating distribution (restaurants) --------------------
   output$ratingDist <- renderPlotly({
     data <- filteredData()  # Assuming this fetches your restaurant data
     # Group by restaurant name and calculate the unique rating for each restaurant
@@ -197,7 +233,7 @@ server <- function(input, output, session) {
       
       # Create the histogram with customized hovertemplate
       p <- plot_ly(rating_restaurants, x = ~rating, type = 'histogram',
-                   marker = list(color = '#ADD8E6', line = list(color = 'rgba(255, 255, 255, 1)', width = 0.2)),
+                   marker = list(color = '#94E2D1', line = list(color = 'rgba(255, 255, 255, 1)', width = 0.2)),
                    hoverinfo = 'x+y',  # Will display both the x value (range) and y value (count)
                    hovertemplate = paste(
                      "Rating: %{x}<br>",
@@ -228,6 +264,7 @@ server <- function(input, output, session) {
     }
   })
   
+  # -- Plotly output for rating distribution (reviews) --------------------
   output$reviewRatingDist <- renderPlotly({
     data <- filteredData()  # Assuming this fetches your review data, including sentiment scores
     review_ratings <- data$review_rating
@@ -245,7 +282,7 @@ server <- function(input, output, session) {
       # Create the histogram for review ratings
       p <- plot_ly(data, x = ~review_rating, type = 'histogram',
                    name = 'Review Ratings',
-                   marker = list(color = '#ADD8E6', line = list(color = 'rgba(255, 255, 255, 1)', width = 0.2)),
+                   marker = list(color = '#94E2D1', line = list(color = 'rgba(255, 255, 255, 1)', width = 0.2)),
                    hoverinfo = 'x+y',  # Will display both the x value (range) and y value (count)
                    hovertemplate = paste(
                      "Rating: %{x}<br>",
@@ -298,6 +335,7 @@ server <- function(input, output, session) {
     }
   })
   
+  # -- Plotly output for number of reviews per year (reviews over time) -------
   output$reviewsPerYearPlot <- renderPlotly({
     data <- filteredData()
     
@@ -309,8 +347,8 @@ server <- function(input, output, session) {
     
     # Plot
     p <- plot_ly(reviews_per_year, x = ~year, y = ~count, type = 'bar',
-                 marker = list(color = '#ADD8E6',
-                               line = list(color = '#ADD8E6', width = 1))) %>%
+                 marker = list(color = '#94E2D1',
+                               line = list(color = '#94E2D1', width = 1))) %>%
       layout(title = 'Number of Reviews Per Year',
              xaxis = list(title = 'Year'),
              yaxis = list(title = 'Number of Reviews'))
@@ -319,7 +357,7 @@ server <- function(input, output, session) {
   })
   
   
-  # Map setup with popup having a filter button
+  # -- Map setup with popup having a filter button --------------------
   output$map <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
@@ -332,13 +370,14 @@ server <- function(input, output, session) {
       )
   })
   
-  # Observe the restaurantName input and update pickerInputs
+  # Observe the restaurantName input and update pickerInputs when 'Filter' is clicked
   observeEvent(input$restaurantName, {
     trimmedName <- trimws(input$restaurantName)
     updatePickerInput(session, "restaurantName", selected = trimmedName)
     updatePickerInput(session, "restaurantNameTable", selected = trimmedName)
   })
   
+  # -- Reactive expressions for diagrams --------------------------------------
   # Reactive expression to calculate the average review score per restaurant category
   averageReviewByCategory <- reactive({
     filteredData() %>%
@@ -368,13 +407,14 @@ server <- function(input, output, session) {
     return(combined_data)
   })
   
+  # -- Plotly output for average review and sentiment scores per restaurant category
   # Render Plotly bar chart for average review score and average sentiment score per restaurant category
   output$averageReviewByCategoryPlot <- renderPlotly({
     avg_data <- combinedAverageByCategory()
     
     plot_ly(avg_data, x = ~reorder(type, -average_rating), y = ~average_rating, type = 'bar',
             name = 'Average Review Score',
-            marker = list(color = '#ADD8E6', line = list(color = '#ADD8E6', width = 1.5)),
+            marker = list(color = '#94E2D1', line = list(color = '#94E2D1', width = 1.5)),
             hovertext = ~paste(type, '<br>Average Review Score:', round(average_rating, 2)),
             hoverinfo = 'text') %>%
       add_trace(y = ~average_sentiment, name = 'Average Sentiment Score', type = 'bar',

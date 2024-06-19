@@ -1,3 +1,33 @@
+.navbar.navbar-default.navbar-static-top {
+    background-color: #D1D1D1;
+}
+
+/* Change the background color of the active tab */
+.nav.navbar-nav.nav-underline > li.active > a,
+.nav.navbar-nav.nav-underline > li.active > a:focus,
+.nav.navbar-nav.nav-underline > li.active > a:hover {
+    background-color: #94E2D1;
+    color: #fff; 
+}
+
+/* Change the background color of the inactive tabs on hover */
+.nav.navbar-nav.nav-underline > li > a:hover {
+    background-color: #94E2D1;
+    color: #FAFAFA; 
+}
+
+.nav.navbar-nav.nav-underline > li > a {
+    color: #fff; 
+}
+
+.navbar-header .navbar-brand {
+    color: #fff;
+}
+
+.navbar-header .navbar-brand:hover {
+    color: #fff;
+}
+
 .custom-box1 {
 background-color: #f2f2f2;
 padding: 20px;
@@ -81,7 +111,7 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
   font-weight: bold;
 }
 .nav-tabs {
-  border-bottom: 1px solid #ADD8E6; /* Adjust to match the border color of the tabs */
+  border-bottom: 1px solid #94E2D1; /* Adjust to match the border color of the tabs */
 }
 .nav-tabs > li {
   margin-bottom: -1px; /* Overlap the bottom border */
@@ -90,7 +120,7 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 
 .nav-tabs > li > a,
 .nav-tabs > li > a:hover {
-  border: 1px solid #ADD8E6; /* Blue border for all states */
+  border: 1px solid #94E2D1; /* Blue border for all states */
   border-bottom: none; /* Remove bottom border for all states */
   border-radius: 8px 8px 0 0; /* Rounded corners for all states */
 }
@@ -103,20 +133,20 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 .nav-tabs > li > a {
   background-color: #FFFFFF;
   color: black; /* Black text for inactive tabs */
-  border-color: #ADD8E6; /* Blue border for inactive tab */
+  border-color: #94E2D1; /* Blue border for inactive tab */
 }
 
 .nav-tabs > li > a:hover {
-  background-color: #ADD8E6; /* Blue background on hover */
+  background-color: #94E2D1; /* Blue background on hover */
   color: white; /* White text on hover */
 }
 
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
-  background-color: #ADD8E6; /* Blue background for active tab */
+  background-color: #94E2D1; /* Blue background for active tab */
   color: white; /* White text for active tab */
-  border-color: #ADD8E6; /* Blue border for active tab */
+  border-color: #94E2D1; /* Blue border for active tab */
   border-bottom-color: transparent; /* Make the bottom border transparent */
   z-index: 2; /* Place the active tab above the others */
   border-right: none;
@@ -124,28 +154,28 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 
 /* Change the slider track color */
 .js-irs-0 .irs-bar, .js-irs-1 .irs-bar {
-  background: #ADD8E6;
-  border-color: #ADD8E6;
+  background: #94E2D1;
+  border-color: #94E2D1;
 }
 
 /* Change the slider handle color */
 .js-irs-0 .irs-handle, {
   background: #ffffff; 
-  border-color: #ADD8E6;
+  border-color: #94E2D1;
 }
 
 /* Change the color of the slider from the handle to the end */
 .js-irs-0 .irs-bar-edge {
-  background: #ADD8E6;
+  background: #94E2D1;
 }
 
 /* Change the background color of the handles */
 .irs .irs-from, .irs .irs-to {
-  background-color: #ADD8E6;
+  background-color: #94E2D1;
 }
 
 .js-irs-0 .irs-single, .js-irs-1 .irs-single {
-  background-color: #ADD8E6;
+  background-color: #94E2D1;
 }
 
 /* Change the color for the handle on focus or active state */
@@ -153,11 +183,11 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 .js-irs-0 .irs-handle:focus,
 .js-irs-0 .irs-handle:hover{
   border-color: #ffffff;
-  background: #ADD8E6; 
+  background: #94E2D1; 
 }
    /* Style the dropdown */
 .selectpicker {
-  border: 1px solid #ADD8E6t; 
+  border: 1px solid #94E2D1t; 
   border-radius: 4px; /* Rounded corners for dropdown */
   background-color: #FAFAFA !important; /* White background */
 }
@@ -171,7 +201,7 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 .bootstrap-select .dropdown-toggle {
   background-color: #FFFFFF;  
   border-radius: 4px;
-  border: 1px solid #ADD8E6
+  border: 1px solid #94E2D1
 }
 
 /* Adjust the dropdown menu itself to have rounded corners */
@@ -182,7 +212,7 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 /* Adjust the shadow for the dropdown container */
 .selectize-control.single .selectize-input {
   border-radius: 4px;
-  border: 1px solid #ADD8E6
+  border: 1px solid #94E2D1
 }
 
 /* Change the background color on hover of dropdown options */
@@ -193,16 +223,16 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 }
 
 .selectize-dropdown .selected {
-  background-color: #ADD8E6;
+  background-color: #94E2D1;
   color: white;
 }
 
 /* Change the outline color of the selectize input when it is focused */
 .selectize-input.focus {
-  border-color: #ADD8E6; /* Teal border for focused state */
-  box-shadow: 0 0 0 1px #ADD8E6;
+  border-color: #94E2D1; /* Teal border for focused state */
+  box-shadow: 0 0 0 1px #94E2D1;
 }
 
-.box1 { background-color: #ADD8E6; }
-.box2 { background-color: #ADD8E6; }
-.box3 { background-color: #ADD8E6; }
+.box1 { background-color: #94E2D1; }
+.box2 { background-color: #94E2D1; }
+.box3 { background-color: #94E2D1; }

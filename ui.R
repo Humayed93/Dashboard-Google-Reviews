@@ -14,9 +14,10 @@ suppressPackageStartupMessages({
 })
 
 # Load dataset
-# load(file.path(this.dir(), 'review_data_cleaned.RData'))
 review_data_cleaned <- read_csv(file.path(this.dir(), 'review_data_with_sentiment.csv'))
 
+# Exclude 'about' variable from dataset
+review_data_cleaned <- review_data_cleaned %>% select(-about)
 
 # Create variables outside of the server/ui function
 # Extract unique values for filters
@@ -30,6 +31,7 @@ type <- sort(unique(review_data_cleaned$type))
 minReview <- min(review_data_cleaned$rating)
 maxReview <- max(review_data_cleaned$rating)
 
+# Main UI
 ui <- navbarPage(
   "Dashboard Google Reviews",
   
@@ -41,6 +43,7 @@ ui <- navbarPage(
            sidebarLayout(
              sidebarPanel(
                width = 3,
+               # Create filters in the sidebar
                sliderInput("restaurantRatingTable",
                            "Restaurant Rating:",
                            min = minReview,
@@ -69,10 +72,12 @@ ui <- navbarPage(
              )
            )
   ),
+  # Data Exploration tab
   tabPanel("Data Exploration",
            sidebarLayout(
              sidebarPanel(
                width = 3,
+               # Create filters in the sidebar
                sliderInput("restaurantRating",
                            "Restaurant Rating:",
                            min = minReview,
@@ -94,6 +99,7 @@ ui <- navbarPage(
                            "Type of Restaurant:",
                            choices = type, multiple = TRUE, options = list(`actions-box` = TRUE))
              ),
+             # Main panel with numbers, diagrams, and maps
              mainPanel(
                width = 9,
                uiOutput("metricsDisplay"),
