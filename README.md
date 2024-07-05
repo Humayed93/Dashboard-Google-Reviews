@@ -21,8 +21,9 @@ This Shiny application provides a comprehensive dashboard for visualizing Google
 - `server.R` - Server logic of the Shiny application.
 - `app.R` - Application initialization script. This file must be executed to run the dashboard.
 - `Capstone_Preprocessing.R` - Preprocessing script for the project data.
-- `Outscraper-202403301950517c03.csv` - Original file with Google reviews from Outscraper in CSV format. 
-- `Restaurant_Information.RData` - Data file containing detailed information about the restaurants.
+- `Outscraper-202403301950517c03.csv` - Original file with Google reviews from Outscraper in CSV format.
+- `Restaurant_information.csv`- Original file with additional restaurant information from Outscraper in CSV format.
+- `Restaurant_Information.RData` - Data file containing detailed information about the restaurants, partly cleaned.
 - `review_data_cleaned.RData` - Cleaned review data in RData format.
 - `review_data_cleaned.csv` - Cleaned review data in CSV format.
 - `review_data_with_sentiment.csv` - Review data with sentiment scores in CSV format. This is the csv used for the dashboard.
