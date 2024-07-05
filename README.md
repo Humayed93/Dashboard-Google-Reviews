@@ -20,6 +20,8 @@ This Shiny application provides a comprehensive dashboard for visualizing Google
 - `ui.R` - User interface definition.
 - `server.R` - Server logic of the Shiny application.
 - `app.R` - Application initialization script. This file must be executed to run the dashboard.
+- `Reviews_Sentiment_Analysis.py` - Sentiment Analysis Script, used to generate the data required for the dashboard.
+- `ID_retrieval_from_Google_Maps.py` - ID retrieval script containing the code to retrieve restaurant IDs using the Google Reviews API.
 - `Capstone_Preprocessing.R` - Preprocessing script for the project data.
 - `Outscraper-202403301950517c03.csv` - Original file with Google reviews from Outscraper in CSV format.
 - `Restaurant_information.csv`- Original file with additional restaurant information from Outscraper in CSV format.
